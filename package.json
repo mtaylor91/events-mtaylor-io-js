@@ -1,0 +1,16 @@
+{
+  "name": "events-mtaylor-io-js",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@types/uuid": "^9.0.8",
+    "iam-mtaylor-io-js": "github:mtaylor91/iam-mtaylor-io-js",
+    "uuid": "^9.0.1"
+  }
+}
