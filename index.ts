@@ -108,4 +108,20 @@ export default class Socket {
   public onError(error: any) {
     console.log('onError', error);
   }
+
+  public onUserMessage(user: string, handler: (event: MessageEvent) => void) {
+    const handlers = this.userHandlers.get(user) || [];
+    handlers.push(handler);
+    this.userHandlers.set(user, handlers);
+  }
+
+  public onGroupMessage(group: string, handler: (event: MessageEvent) => void) {
+    const handlers = this.groupHandlers.get(group) || [];
+    handlers.push(handler);
+    this.groupHandlers.set(group, handlers);
+  }
+
+  public onSessionMessage(handler: (event: MessageEvent) => void) {
+    this.sessionHandlers.push(handler);
+  }
 }
