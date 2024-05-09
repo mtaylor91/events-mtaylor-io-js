@@ -3,7 +3,7 @@ import axios from 'axios';
 import type { AxiosResponse } from 'axios';
 import IAM from 'iam-mtaylor-io-js';
 import type { User } from 'iam-mtaylor-io-js';
-import { parse as parseUUID, v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 const DEFAULT_HOST = "events.mtaylor.io";
 const DEFAULT_SECURE = true;
@@ -99,15 +99,15 @@ export default class Client {
 
 export class Socket {
   public connected: boolean;
+  public user: null | User;
+  public url: string;
 
   public userHandlers: Map<string, ((event: MessageEvent) => void)[]>;
   public groupHandlers: Map<string, ((event: MessageEvent) => void)[]>;
   public sessionHandlers: ((event: MessageEvent) => void)[];
 
-  private socket: null | WebSocket;
-  private url: string;
   private iam: IAM;
-  private user: null | User;
+  private socket: null | WebSocket;
 
   constructor(iam: IAM, host: string = DEFAULT_HOST, secure: boolean = DEFAULT_SECURE) {
     this.connected = false;
