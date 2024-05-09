@@ -162,12 +162,20 @@ export class Socket {
     }
   }
 
+  public join(group: string) {
+    this.send({ type: 'joinGroup', group });
+  }
+
+  public leave(group: string) {
+    this.send({ type: 'leaveGroup', group });
+  }
+
   public send(data: any) {
     if (!this.socket) {
       throw new Error('Socket is not connected');
     }
 
-    this.socket.send(data);
+    this.socket.send(JSON.stringify(data));
   }
 
   public onMessage(event: MessageEvent) {
