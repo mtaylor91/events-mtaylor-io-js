@@ -102,7 +102,7 @@ export class Socket {
   public user: null | User;
   public url: string;
 
-  public handlers: ((event: MessageEvent) => void)[];
+  public handlers: ((event: any) => void)[];
 
   private iam: IAM;
   private socket: null | WebSocket;
@@ -135,7 +135,8 @@ export class Socket {
       this.socket = socket;
       this.user = user;
       socket.binaryType = 'arraybuffer';
-      socket.onmessage = e => this.handlers.forEach(handler => handler(e));
+      socket.onmessage = e =>
+        this.handlers.forEach(handler => handler(JSON.parse(e.data)));
       socket.onclose = this.onClose;
       socket.onerror = reject;
       socket.onopen = () => {
@@ -184,7 +185,7 @@ export class Socket {
     console.log('onError', error);
   }
 
-  public onMessage(handler: (event: MessageEvent) => void) {
+  public onMessage(handler: (event: any) => void) {
     this.handlers.push(handler);
   }
 }
