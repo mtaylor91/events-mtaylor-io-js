@@ -102,9 +102,7 @@ export class Socket {
   public user: null | User;
   public url: string;
 
-  public userHandlers: Map<string, ((event: MessageEvent) => void)[]>;
-  public groupHandlers: Map<string, ((event: MessageEvent) => void)[]>;
-  public sessionHandlers: ((event: MessageEvent) => void)[];
+  public handlers: ((event: MessageEvent) => void)[];
 
   private iam: IAM;
   private socket: null | WebSocket;
@@ -115,9 +113,7 @@ export class Socket {
     this.user = null;
     this.iam = iam;
     this.url = `${secure ? 'wss' : 'ws'}://${host}`;
-    this.userHandlers = new Map();
-    this.groupHandlers = new Map();
-    this.sessionHandlers = [];
+    this.handlers = [];
   }
 
   public async connect(): Promise<Socket> {
@@ -139,7 +135,7 @@ export class Socket {
       this.socket = socket;
       this.user = user;
       socket.binaryType = 'arraybuffer';
-      socket.onmessage = this.onMessage.bind(this);
+      socket.onmessage = e => this.handlers.forEach(handler => handler(e));
       socket.onclose = this.onClose;
       socket.onerror = reject;
       socket.onopen = () => {
@@ -178,20 +174,6 @@ export class Socket {
     this.socket.send(JSON.stringify(data));
   }
 
-  public onMessage(event: MessageEvent) {
-    const message = JSON.parse(event.data);
-    console.log('onMessage', message);
-    const recipient = message.recipient;
-    if (recipient.user) {
-      const handlers = this.userHandlers.get(recipient.user) || [];
-      handlers.forEach(handler => handler(event))
-    }
-    if (recipient.group)
-      this.groupHandlers.get(recipient.group)?.forEach(handler => handler(event));
-    if (recipient.session)
-      this.sessionHandlers.forEach(handler => handler(event));
-  }
-
   public onClose(event: CloseEvent) {
     console.log('onClose', event);
     this.connected = false;
@@ -202,19 +184,7 @@ export class Socket {
     console.log('onError', error);
   }
 
-  public onUserMessage(user: string, handler: (event: MessageEvent) => void) {
-    const handlers = this.userHandlers.get(user) || [];
-    handlers.push(handler);
-    this.userHandlers.set(user, handlers);
-  }
-
-  public onGroupMessage(group: string, handler: (event: MessageEvent) => void) {
-    const handlers = this.groupHandlers.get(group) || [];
-    handlers.push(handler);
-    this.groupHandlers.set(group, handlers);
-  }
-
-  public onSessionMessage(handler: (event: MessageEvent) => void) {
-    this.sessionHandlers.push(handler);
+  public onMessage(handler: (event: MessageEvent) => void) {
+    this.handlers.push(handler);
   }
 }
