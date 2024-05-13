@@ -167,6 +167,11 @@ export class Socket {
     this.send({ type: 'leaveGroup', group });
   }
 
+  public publish(topic: string, data: any) {
+    const id = uuidv4();
+    this.send({ id, type: 'publish', topic, data });
+  }
+
   public send(data: any) {
     if (!this.socket) {
       throw new Error('Socket is not connected');
