@@ -169,7 +169,8 @@ export class Socket {
 
   public publish(topic: string, data: any) {
     const id = uuidv4();
-    this.send({ id, type: 'publish', topic, data });
+    const created = new Date().toISOString();
+    this.send({ id, type: 'publish', topic, data, created });
   }
 
   public send(data: any) {
