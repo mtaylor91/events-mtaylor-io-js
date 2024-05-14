@@ -159,18 +159,22 @@ export class Socket {
     }
   }
 
-  public join(group: string) {
-    this.send({ type: 'joinGroup', group });
-  }
-
-  public leave(group: string) {
-    this.send({ type: 'leaveGroup', group });
-  }
-
   public publish(topic: string, data: any) {
     const id = uuidv4();
     const created = new Date().toISOString();
     this.send({ id, type: 'publish', topic, data, created });
+  }
+
+  public subscribe(topic: string) {
+    this.send({ type: 'subscribe', topic });
+  }
+
+  public unsubscribe(topic: string) {
+    this.send({ type: 'unsubscribe', topic });
+  }
+
+  public replay(topic: string) {
+    this.send({ type: 'replay', topic });
   }
 
   public send(data: any) {
