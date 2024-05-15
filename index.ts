@@ -103,6 +103,7 @@ export class Socket {
   public url: string;
 
   public handlers: ((event: any) => void)[];
+  public subscribers: Map<string, ((event: any) => void)[]>;
 
   private iam: IAM;
   private socket: null | WebSocket;
@@ -114,6 +115,7 @@ export class Socket {
     this.iam = iam;
     this.url = `${secure ? 'wss' : 'ws'}://${host}`;
     this.handlers = [];
+    this.subscribers = new Map();
   }
 
   public async connect(): Promise<Socket> {
@@ -135,8 +137,13 @@ export class Socket {
       this.socket = socket;
       this.user = user;
       socket.binaryType = 'arraybuffer';
-      socket.onmessage = e =>
-        this.handlers.forEach(handler => handler(JSON.parse(e.data)));
+      socket.onmessage = e => {
+        const eventData = JSON.parse(e.data);
+        this.handlers.forEach(handler => handler(eventData));
+        const topic = eventData.topic;
+        const handlers = this.subscribers.get(topic) || [];
+        handlers.forEach(handler => handler(eventData));
+      }
       socket.onclose = this.onClose;
       socket.onerror = reject;
       socket.onopen = () => {
@@ -165,12 +172,26 @@ export class Socket {
     this.send({ id, type: 'publish', topic, data, created });
   }
 
-  public subscribe(topic: string) {
+  public subscribe(topic: string, handler: null | ((event: any) => void) = null) {
+    if (handler) {
+      const handlers = this.subscribers.get(topic) || [];
+      handlers.push(handler);
+      this.subscribers.set(topic, handlers);
+    }
+
     this.send({ type: 'subscribe', topic });
   }
 
-  public unsubscribe(topic: string) {
+  public unsubscribe(topic: string, handler: null | ((event: any) => void) = null) {
     this.send({ type: 'unsubscribe', topic });
+
+    if (handler) {
+      const handlers = this.subscribers.get(topic) || [];
+      const index = handlers.indexOf(handler);
+      if (index > -1) {
+        handlers.splice(index, 1);
+      }
+    }
   }
 
   public replay(topic: string) {
