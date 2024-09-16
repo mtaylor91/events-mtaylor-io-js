@@ -87,7 +87,7 @@ export default class Client {
       method,
       this.host,
       path,
-      query || '',
+      query ? `?${query}` : '',
       requestId,
       sessionToken,
     ];
