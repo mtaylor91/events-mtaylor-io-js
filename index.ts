@@ -16,6 +16,15 @@ export interface ClientHello {
 }
 
 
+export interface EventData {
+  id: string;
+  type: string;
+  topic: string;
+  created: string;
+  [key: string]: any;
+}
+
+
 export default class Client {
   public url: string;
   public host: string;
@@ -33,6 +42,12 @@ export default class Client {
 
   public async connect(): Promise<Socket> {
     return await this.socket.connect();
+  }
+
+  public async publish(topic: string, data: { [key: string]: any }): Promise<EventData> {
+    const url = `/topics/${topic}/events/${uuidv4()}`;
+    const response = await this.request('POST', url, null, data);
+    return response.data;
   }
 
   async request(
